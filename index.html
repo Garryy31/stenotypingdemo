@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steno Exam Portal | Digital Transcription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Mistake Highlighting Styles */
+        .diff-correct { color: #10b981; }
+        .diff-error { color: #ef4444; text-decoration: line-through; font-weight: bold; }
+        .diff-missing { color: #f59e0b; border-bottom: 2px dashed #f59e0b; }
+
+        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
+        #typing-area {
+            resize: none;
+            line-height: 2;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            transition: border-color 0.2s;
+        }
+        #typing-area:focus {
+            border-color: #4f46e5;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Professional Header -->
+    <header class="bg-indigo-700 py-6 px-6 mb-8 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">STENO EXAM PORTAL</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-indigo-100 text-sm font-medium">
+                    Professional Transcription System
+                </div>
+                <a href="admin.html" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition text-sm">
+                    ⚙️ Admin Panel
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 pb-12">
+        
+        <!-- Step 1: Dictation Section -->
+        <section id="dictation-step" class="card p-8 mb-6 border border-slate-200">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Phase 1: Audio Dictation</h2>
+                <div class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-semibold uppercase tracking-wider">Listening</div>
+            </div>
+            
+            <div class="bg-slate-50 rounded-2xl p-10 text-center border-2 border-dashed border-slate-200">
+                <div id="audio-visualizer" class="flex justify-center gap-1 h-12 items-center mb-6 hidden">
+                    <div class="w-1 bg-blue-500 h-4 animate-bounce"></div>
+                    <div class="w-1 bg-blue-500 h-10 animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-1 bg-blue-500 h-6 animate-bounce" style="animation-delay: 0.2s"></div>
+                    <div class="w-1 bg-blue-500 h-8 animate-bounce" style="animation-delay: 0.3s"></div>
+                    <div class="w-1 bg-blue-500 h-4 animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>
+
+                <button id="play-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition flex items-center gap-3 mx-auto">
+                    <span id="play-icon">▶</span> Play Audio Dictation
+                </button>
+                
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <!-- Audio Source Selection -->
+                    <label class="text-sm font-medium text-slate-600">Select Audio Source:</label>
+                    <select id="audio-source-select" class="bg-white border border-slate-300 rounded-lg px-4 py-2 w-64 focus:ring-2 ring-indigo-500 outline-none">
+                        <option value="text-to-speech">🔊 Text-to-Speech (Default)</option>
+                    </select>
+
+                    <!-- Speed Selection (shown only for text-to-speech) -->
+                    <div id="speed-container" class="flex flex-col items-center gap-2">
+                        <label class="text-sm font-medium text-slate-600">Choose Dictation Speed:</label>
+                        <select id="speed-select" class="bg-white border border-slate-300 rounded-lg px-4 py-2 w-48 focus:ring-2 ring-indigo-500 outline-none">
+                            <option value="50">50 WPM</option>
+                            <option value="55">55 WPM</option>
+                            <option value="60" selected>60 WPM</option>
+                            <option value="65">65 WPM</option>
+                            <option value="70">70 WPM</option>
+                            <option value="75">75 WPM</option>
+                            <option value="80">80 WPM</option>
+                            <option value="85">85 WPM</option>
+                            <option value="90">90 WPM</option>
+                            <option value="95">95 WPM</option>
+                            <option value="100">100 WPM</option>
+                            <option value="105">105 WPM</option>
+                            <option value="110">110 WPM</option>
+                            <option value="115">115 WPM</option>
+                            <option value="120">120 WPM</option>
+                            <option value="125">125 WPM</option>
+                            <option value="130">130 WPM</option>
+                            <option value="135">135 WPM</option>
+                            <option value="140">140 WPM</option>
+                            <option value="145">145 WPM</option>
+                            <option value="150">150 WPM</option>
+                            <option value="155">155 WPM</option>
+                            <option value="160">160 WPM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="finish-dictation" class="mt-8 text-indigo-600 hover:underline font-semibold hidden">
+                    Dictation complete? Start Typing Test
+                </button>
+            </div>
+            <p class="mt-4 text-sm text-slate-500 text-center italic">Prepare your shorthand outlines as you listen.</p>
+        </section>
+
+        <!-- Step 2: Typing Section -->
+        <section id="typing-step" class="card p-8 hidden border border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Phase 2: English Transcription</h2>
+                    <p class="text-slate-500">Read your shorthand and type the English text below.</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-center bg-slate-100 px-4 py-2 rounded-xl">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Time Remaining</span>
+                        <span id="timer" class="text-2xl font-bold text-rose-600 mono">30:00</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="changeFontSize(1)" class="w-8 h-8 bg-slate-100 rounded flex items-center justify-center font-bold hover:bg-slate-200" title="Increase Font">+</button>
+                        <button onclick="changeFontSize(-1)" class="w-8 h-8 bg-slate-100 rounded flex items-center justify-center font-bold hover:bg-slate-200" title="Decrease Font">-</button>
+                    </div>
+                </div>
+            </div>
+
+            <textarea id="typing-area" class="w-full h-80 p-6 rounded-xl bg-slate-50 mono border-2" placeholder="Type your transcription here..."></textarea>
+            
+            <div class="mt-6 flex justify-between items-center">
+                <p class="text-sm text-slate-400">Total Word Count: <span id="word-counter" class="font-bold">0</span></p>
+                <button id="submit-test" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-xl font-bold shadow-lg transition">
+                    Submit Transcription
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Result Section -->
+        <section id="result-step" class="card p-8 hidden border border-slate-200">
+            <div class="flex justify-between items-center mb-8 border-b pb-4">
+                <h2 class="text-2xl font-bold">Performance Analysis</h2>
+                <button onclick="location.reload()" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg text-slate-700 font-semibold transition">Start New Test</button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                    <span class="text-xs text-slate-500 font-bold uppercase block">Text Length</span>
+                    <span id="res-total" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
+                    <span class="text-xs text-emerald-600 font-bold uppercase block">Matches</span>
+                    <span id="res-correct" class="text-2xl font-bold text-emerald-700">0</span>
+                </div>
+                <div class="bg-rose-50 p-4 rounded-xl text-center border border-rose-100">
+                    <span class="text-xs text-rose-600 font-bold uppercase block">Errors</span>
+                    <span id="res-errors" class="text-2xl font-bold text-rose-700">0</span>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-xl text-center border border-indigo-100">
+                    <span class="text-xs text-indigo-600 font-bold uppercase block">Accuracy</span>
+                    <span id="res-acc" class="text-2xl font-bold text-indigo-700">0%</span>
+                </div>
+            </div>
+
+            <div class="mb-4 text-sm font-semibold text-slate-600">Comparison View:</div>
+            <div class="bg-slate-900 rounded-xl p-8 text-slate-300 leading-relaxed mono text-lg overflow-y-auto max-h-[400px]" id="comparison-display">
+                <!-- Result analysis shown here -->
+            </div>
+            
+            <div class="mt-6 flex flex-wrap gap-6 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <span class="flex items-center gap-2"><span class="w-3 h-3 bg-red-500 rounded-full"></span> Typo / Wrong Word</span>
+                <span class="flex items-center gap-2"><span class="w-3 h-3 bg-green-500 rounded-full"></span> Correct Word</span>
+                <span class="flex items-center gap-2"><span class="w-3 h-3 bg-amber-500 rounded-full"></span> Skipped Word</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Confirmation -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Confirm Submission?</h3>
+            <p class="text-slate-500 mb-6">Are you sure you want to end the test? You cannot edit your transcription after this.</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 px-4 py-2 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50">Back</button>
+                <button id="final-submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700">Submit Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textPool = [
+            "The food eaten by man bears something like the same relation to his power of working as the fuel of the furnace bears to the engine which drives the rotary press or draws the train. The power in our arms and in our bodies is rightly said to be produced in our stomach and it is from the same organ we derive the force necessary to exertion in the earning of the wage or salary we receive for our services. Something of the value of our work must upon the strength producing value of our food. At all costs and by all means we should take measures to ensure the best value in everything we eat.",
+            "Communication is the exchange of ideas and information between individuals through writing, speech, or signals. It forms the foundation of all human relationships and social structures. Effective communication requires clear expression and active listening from both parties involved. Understanding the perspective of others helps build stronger connections and resolve conflicts peacefully. In today's digital world, communication has expanded beyond face-to-face interactions to include emails, messaging, and video calls. The ability to communicate effectively is essential for success in any profession.",
+            "Technology has transformed every aspect of modern life including how we work, learn, and connect with others. Artificial intelligence and machine learning are changing industries at an unprecedented pace. The internet has democratized access to information making knowledge available to billions of people worldwide. However, this rapid advancement also brings challenges such as privacy concerns and cybersecurity threats. Organizations must balance innovation with responsibility to protect user data. The future of technology depends on ethical development and sustainable practices.",
+            "Education is the most powerful tool for personal growth and societal development. It empowers individuals to think critically and make informed decisions about their lives. Quality education provides opportunities for better employment and improved economic status. Learning develops confidence and helps people pursue their aspirations and dreams. In the modern era, education extends beyond classrooms to online platforms and self-directed learning. Investing in education benefits not only individuals but entire communities and nations.",
+            "Health and wellness are interconnected aspects of overall well-being that require attention and care. Regular exercise strengthens the body and improves mental health by reducing stress and anxiety. A balanced diet rich in nutrients supports physical energy and cognitive function. Adequate sleep is crucial for memory consolidation and emotional regulation. Mental health awareness has become increasingly important as people recognize psychological well-being importance. Preventive healthcare through regular checkups can detect problems early and save lives."
+        ];
+
+        const originalText = textPool[Math.floor(Math.random() * textPool.length)];
+
+        let timeLeft = 1800;
+        let timerId = null;
+        let fontSize = 18;
+
+        const playBtn = document.getElementById('play-btn');
+        const finishDictation = document.getElementById('finish-dictation');
+        const visualizer = document.getElementById('audio-visualizer');
+        const dictStep = document.getElementById('dictation-step');
+        const typStep = document.getElementById('typing-step');
+        const resStep = document.getElementById('result-step');
+        const typingArea = document.getElementById('typing-area');
+        const wordCounter = document.getElementById('word-counter');
+        const audioSourceSelect = document.getElementById('audio-source-select');
+        const speedContainer = document.getElementById('speed-container');
+        let isPlaying = false;
+        let currentAudioElement = null;
+
+        // Load uploaded audios and populate dropdown
+        function loadUploadedAudios() {
+            const audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+            
+            if (audios.length > 0) {
+                audios.forEach(audio => {
+                    const option = document.createElement('option');
+                    option.value = `audio-${audio.id}`;
+                    option.textContent = `🎵 ${audio.name}`;
+                    audioSourceSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Update speed container visibility based on selected source
+        audioSourceSelect.addEventListener('change', () => {
+            const selectedValue = audioSourceSelect.value;
+            if (selectedValue === 'text-to-speech') {
+                speedContainer.classList.remove('hidden');
+            } else {
+                speedContainer.classList.add('hidden');
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                // Stop current playback
+                if (currentAudioElement) {
+                    currentAudioElement.pause();
+                }
+                speechSynthesis.cancel();
+                isPlaying = false;
+                playBtn.innerHTML = "<span>↻</span> Replay Audio";
+                playBtn.classList.replace('bg-slate-600', 'bg-emerald-600');
+                visualizer.classList.add('hidden');
+                finishDictation.classList.remove('hidden');
+            } else {
+                isPlaying = true;
+                const selectedSource = audioSourceSelect.value;
+
+                if (selectedSource === 'text-to-speech') {
+                    // Play text-to-speech
+                    playTextToSpeech();
+                } else {
+                    // Play uploaded audio
+                    playUploadedAudio(selectedSource);
+                }
+            }
+        });
+
+        function playTextToSpeech() {
+            const utterance = new SpeechSynthesisUtterance(originalText);
+            utterance.rate = parseInt(document.getElementById('speed-select').value) / 60;
+            utterance.pitch = 1;
+            
+            playBtn.innerHTML = "<span>⏹</span> Stop Audio";
+            playBtn.classList.replace('bg-emerald-600', 'bg-slate-600');
+            visualizer.classList.remove('hidden');
+            
+            utterance.onend = () => {
+                isPlaying = false;
+                playBtn.innerHTML = "<span>↻</span> Replay Audio";
+                playBtn.classList.replace('bg-slate-600', 'bg-emerald-600');
+                visualizer.classList.add('hidden');
+                finishDictation.classList.remove('hidden');
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        function playUploadedAudio(sourceId) {
+            const audioId = parseInt(sourceId.replace('audio-', ''));
+            const audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+            const audio = audios.find(a => a.id === audioId);
+
+            if (!audio) {
+                alert('Audio file not found!');
+                isPlaying = false;
+                return;
+            }
+
+            currentAudioElement = new Audio(audio.data);
+            
+            playBtn.innerHTML = "<span>⏹</span> Stop Audio";
+            playBtn.classList.replace('bg-emerald-600', 'bg-slate-600');
+            visualizer.classList.remove('hidden');
+
+            currentAudioElement.onended = () => {
+                isPlaying = false;
+                playBtn.innerHTML = "<span>↻</span> Replay Audio";
+                playBtn.classList.replace('bg-slate-600', 'bg-emerald-600');
+                visualizer.classList.add('hidden');
+                finishDictation.classList.remove('hidden');
+            };
+
+            currentAudioElement.play().catch(err => {
+                alert('Error playing audio: ' + err.message);
+                isPlaying = false;
+            });
+        }
+
+        finishDictation.addEventListener('click', () => {
+            dictStep.classList.add('hidden');
+            typStep.classList.remove('hidden');
+            startTimer();
+            typingArea.focus();
+        });
+
+        typingArea.addEventListener('input', () => {
+            const count = typingArea.value.trim() ? typingArea.value.trim().split(/\s+/).length : 0;
+            wordCounter.innerText = count;
+        });
+
+        function startTimer() {
+            timerId = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = 
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    processResult();
+                }
+            }, 1000);
+        }
+
+        function changeFontSize(delta) {
+            fontSize += delta;
+            typingArea.style.fontSize = fontSize + 'px';
+        }
+
+        document.getElementById('submit-test').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.replace('hidden', 'flex');
+        });
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.replace('flex', 'hidden');
+        }
+
+        document.getElementById('final-submit').addEventListener('click', () => {
+            clearInterval(timerId);
+            closeModal();
+            processResult();
+        });
+
+        function processResult() {
+            const userText = typingArea.value.trim();
+            const originalWords = originalText.split(/\s+/);
+            const userWords = userText.split(/\s+/);
+            
+            let html = "";
+            let correctCount = 0;
+            let errorCount = 0;
+
+            const maxLength = Math.max(originalWords.length, userWords.length);
+            
+            for (let i = 0; i < maxLength; i++) {
+                const orig = originalWords[i] || "";
+                const user = userWords[i] || "";
+
+                if (orig.toLowerCase() === user.toLowerCase() && orig !== "") {
+                    html += `<span class="diff-correct">${user}</span> `;
+                    correctCount++;
+                } else if (user === "") {
+                    html += `<span class="diff-missing">${orig}</span> `;
+                    errorCount++;
+                } else if (orig === "") {
+                    html += `<span class="diff-error">${user}</span> `;
+                    errorCount++;
+                } else {
+                    html += `<span class="diff-error">${user}</span> <span class="text-slate-500 text-sm opacity-50">(${orig})</span> `;
+                    errorCount++;
+                }
+            }
+
+            const accuracy = ((correctCount / originalWords.length) * 100).toFixed(1);
+
+            document.getElementById('res-total').innerText = originalWords.length;
+            document.getElementById('res-correct').innerText = correctCount;
+            document.getElementById('res-errors').innerText = errorCount;
+            document.getElementById('res-acc').innerText = accuracy + "%";
+            document.getElementById('comparison-display').innerHTML = html;
+
+            typStep.classList.add('hidden');
+            resStep.classList.remove('hidden');
+        }
+
+        // Load uploaded audios on page load
+        loadUploadedAudios();
+    </script>
+</body>
+</html>

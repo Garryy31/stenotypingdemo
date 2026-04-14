@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Steno Exam Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        
+        .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
+        .upload-zone {
+            border: 2px dashed #e2e8f0;
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .upload-zone.drag-over {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        
+        .audio-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .audio-item:hover {
+            background-color: #f8fafc;
+            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-12 shadow-2xl">
+            <div class="flex justify-center mb-6">
+                <div class="bg-purple-100 p-4 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Admin Access</h2>
+            <p class="text-center text-slate-500 text-sm mb-8">Enter your credentials to continue</p>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Username</label>
+                    <input id="username" type="text" placeholder="Enter username" 
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 ring-purple-500 outline-none transition" 
+                        autocomplete="off">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                    <input id="password" type="password" placeholder="Enter password" 
+                        class="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 ring-purple-500 outline-none transition"
+                        autocomplete="off">
+                </div>
+                
+                <div id="errorMsg" class="text-red-600 text-sm font-semibold hidden"></div>
+                
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-bold shadow-lg transition mt-6">
+                    🔓 Login to Admin Panel
+                </button>
+            </form>
+            
+            <p class="text-center text-slate-400 text-xs mt-6">
+                <a href="index.html" class="text-purple-600 hover:underline">Back to Portal</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Professional Header -->
+    <header id="adminHeader" class="bg-purple-700 py-6 px-6 mb-8 shadow-md hidden">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">ADMIN PANEL</h1>
+            </div>
+            <div class="flex gap-3">
+                <button id="logoutBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition">
+                    🚪 Logout
+                </button>
+                <a href="index.html" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold transition">
+                    ← Back to Portal
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main id="adminMain" class="max-w-5xl mx-auto px-4 pb-12 hidden">
+
+
+    </main>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const errorMsg = document.getElementById('errorMsg');
+        const loginModal = document.getElementById('loginModal');
+        const adminHeader = document.getElementById('adminHeader');
+        const adminMain = document.getElementById('adminMain');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = '123';
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
+            if (isLoggedIn) {
+                showAdminPanel();
+            }
+        });
+
+        // Login Handler
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (username.value === ADMIN_USERNAME && password.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                errorMsg.classList.add('hidden');
+                showAdminPanel();
+            } else {
+                errorMsg.textContent = '❌ Invalid username or password';
+                errorMsg.classList.remove('hidden');
+                password.value = '';
+            }
+        });
+
+        // Logout Handler
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('adminLoggedIn');
+            loginModal.classList.remove('hidden');
+            adminHeader.classList.add('hidden');
+            adminMain.classList.add('hidden');
+            username.value = '';
+            password.value = '';
+            errorMsg.classList.add('hidden');
+            username.focus();
+        });
+
+        function showAdminPanel() {
+            loginModal.classList.add('hidden');
+            adminHeader.classList.remove('hidden');
+            adminMain.classList.remove('hidden');
+            displayAudios();
+        }
+
+        const uploadZone = document.querySelector('body').appendChild(createAdminContent());
+        
+        function createAdminContent() {
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <!-- Upload Audio Section -->
+                <section class="card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Upload New Audio for Dictation</h2>
+                    
+                    <!-- Upload Zone -->
+                    <div id="uploadZone" class="upload-zone mb-6 cursor-pointer hover:border-purple-500 hover:bg-purple-50/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                        <p class="text-lg font-semibold text-slate-700 mb-2">Drag and drop audio files here</p>
+                        <p class="text-sm text-slate-500 mb-4">or click to select files</p>
+                        <p class="text-xs text-slate-400">Supported formats: MP3, WAV, OGG, M4A (Max 50MB)</p>
+                        <input id="fileInput" type="file" accept="audio/*" class="hidden">
+                    </div>
+
+                    <!-- Audio Name Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Audio Title/Name</label>
+                        <input id="audioName" type="text" placeholder="e.g., Dictation Test 1, Speed Practice 60 WPM" 
+                            class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 ring-purple-500 outline-none">
+                    </div>
+
+                    <!-- Upload Button -->
+                    <button id="uploadBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition w-full">
+                        💾 Upload Audio
+                    </button>
+
+                    <!-- Status Message -->
+                    <div id="uploadStatus" class="mt-4 p-4 rounded-lg hidden"></div>
+                </section>
+
+                <!-- Uploaded Audio List -->
+                <section class="card p-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">My Uploaded Audios</h2>
+                    
+                    <div id="audioList" class="space-y-2">
+                        <p class="text-slate-500 italic text-center py-8">No audio files uploaded yet. Start by uploading one!</p>
+                    </div>
+                </section>
+            `;
+            return container;
+        }
+
+        // Initialize upload functionality after content is added
+        setTimeout(() => {
+            initializeUpload();
+        }, 100);
+
+        let selectedFile = null;
+
+        function initializeUpload() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const audioNameInput = document.getElementById('audioName');
+            const audioList = document.getElementById('audioList');
+            const uploadStatus = document.getElementById('uploadStatus');
+
+            if (!uploadZone) return; // Exit if elements not found
+
+            // File Input Handler
+            fileInput.addEventListener('change', (e) => {
+                selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    uploadZone.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p class="text-lg font-semibold text-slate-700">${selectedFile.name}</p>
+                        <p class="text-sm text-slate-500">${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    `;
+                }
+            });
+
+            // Drag and Drop
+            uploadZone.addEventListener('click', () => fileInput.click());
+            
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+            
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('drag-over');
+            });
+            
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+                selectedFile = e.dataTransfer.files[0];
+                if (selectedFile) {
+                    uploadZone.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p class="text-lg font-semibold text-slate-700">${selectedFile.name}</p>
+                        <p class="text-sm text-slate-500">${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    `;
+                }
+            });
+
+            // Upload Handler
+            uploadBtn.addEventListener('click', () => {
+                if (!selectedFile) {
+                    showStatus('Please select an audio file', 'error');
+                    return;
+                }
+
+                const audioName = audioNameInput.value.trim() || selectedFile.name;
+                if (!audioName) {
+                    showStatus('Please enter an audio title', 'error');
+                    return;
+                }
+
+                // Convert file to base64
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const base64Data = event.target.result;
+                    
+                    // Get existing audios from localStorage
+                    const audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+                    
+                    // Add new audio
+                    audios.push({
+                        id: Date.now(),
+                        name: audioName,
+                        data: base64Data,
+                        fileName: selectedFile.name,
+                        uploadedAt: new Date().toLocaleString()
+                    });
+
+                    // Save to localStorage
+                    localStorage.setItem('stenoAudios', JSON.stringify(audios));
+
+                    showStatus('✓ Audio uploaded successfully!', 'success');
+                    
+                    // Reset form
+                    selectedFile = null;
+                    audioNameInput.value = '';
+                    uploadZone.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                        <p class="text-lg font-semibold text-slate-700 mb-2">Drag and drop audio files here</p>
+                        <p class="text-sm text-slate-500 mb-4">or click to select files</p>
+                        <p class="text-xs text-slate-400">Supported formats: MP3, WAV, OGG, M4A (Max 50MB)</p>
+                    `;
+
+                    // Refresh list
+                    displayAudios();
+                };
+                
+                reader.readAsDataURL(selectedFile);
+            });
+
+            function showStatus(message, type) {
+                uploadStatus.textContent = message;
+                uploadStatus.className = `mt-4 p-4 rounded-lg ${
+                    type === 'success' 
+                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                }`;
+                uploadStatus.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    uploadStatus.classList.add('hidden');
+                }, 4000);
+            }
+        }
+
+        function displayAudios() {
+            const audioList = document.getElementById('audioList');
+            if (!audioList) return;
+
+            const audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+            
+            if (audios.length === 0) {
+                audioList.innerHTML = '<p class="text-slate-500 italic text-center py-8">No audio files uploaded yet. Start by uploading one!</p>';
+                return;
+            }
+
+            audioList.innerHTML = audios.map(audio => `
+                <div class="audio-item group">
+                    <div class="flex-1">
+                        <p class="font-semibold text-slate-800">${audio.name}</p>
+                        <p class="text-sm text-slate-500">${audio.uploadedAt}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="playAudio(${audio.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                            ▶ Play
+                        </button>
+                        <button onclick="deleteAudio(${audio.id})" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function playAudio(id) {
+            const audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+            const audio = audios.find(a => a.id === id);
+            
+            if (audio) {
+                const audioElement = new Audio(audio.data);
+                audioElement.play().catch(err => alert('Error playing audio: ' + err.message));
+            }
+        }
+
+        function deleteAudio(id) {
+            if (confirm('Are you sure you want to delete this audio?')) {
+                let audios = JSON.parse(localStorage.getItem('stenoAudios') || '[]');
+                audios = audios.filter(a => a.id !== id);
+                localStorage.setItem('stenoAudios', JSON.stringify(audios));
+                displayAudios();
+            }
+        }
+
+        // Focus on username input
+        setTimeout(() => {
+            username.focus();
+        }, 100);
+    </script>
+</body>
+</html>
